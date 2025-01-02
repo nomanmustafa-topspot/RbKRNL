@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('factors', function (Blueprint $table) {
+        Schema::create('reports', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('pdf_template_id');
-            $table->string('factor');
-            $table->string('type'); // e.g., web presence, SEO, etc.
-            $table->text('value');
-            $table->text('result');
-            $table->timestamps();
+            $table->string('file_path');
+            $table->string('score')->nullable();
+            $table->string('website_image')->nullable();
+            $table->timestamp('generated_at');
+            $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('pdf_template_id')->references('id')->on('pdf_templates')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('factors');
+        Schema::dropIfExists('reports');
     }
 };

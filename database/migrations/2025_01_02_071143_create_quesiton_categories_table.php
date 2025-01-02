@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
+        Schema::create('question_categories', function (Blueprint $table) { // Fix typo here
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('designation')->nullable();
-            $table->string('website')->nullable();
-            $table->boolean('pdf_generated')->default(false);
-            $table->date('date')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        Schema::dropIfExists('quesiton_categories');
     }
 };

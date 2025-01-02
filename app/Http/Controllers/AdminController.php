@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Client;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -34,6 +35,10 @@ class AdminController extends Controller
         return view('backend.client.addEdit');
     }
 
+    public function getClientList(){
+        $clients = Client::all();
+        return view('backend.client.list', compact('clients'));
+    }
 
     public function createClient(Request $request)
     {
@@ -51,29 +56,29 @@ class AdminController extends Controller
         // $request->validate($rules);
 
         try {
-            if ($request->hasFile('image_url')) {
-                $imageFolder = 'images';
-                $storagePath = storage_path('app/public/' . $imageFolder);
+            // if ($request->hasFile('image_url')) {
+            //     $imageFolder = 'images';
+            //     $storagePath = storage_path('app/public/' . $imageFolder);
 
-                if (!is_dir($storagePath)) {
-                    mkdir($storagePath, 0755, true);
-                }
-                $filename = Str::uuid() . '.' . $request->file('image_url')->getClientOriginalExtension();
+            //     if (!is_dir($storagePath)) {
+            //         mkdir($storagePath, 0755, true);
+            //     }
+            //     $filename = Str::uuid() . '.' . $request->file('image_url')->getClientOriginalExtension();
 
-                // Store the image with the new unique filename
-                $imagePath = $request->file('image_url')->storeAs($imageFolder, $filename, 'public');
-            }
+            //     // Store the image with the new unique filename
+            //     $imagePath = $request->file('image_url')->storeAs($imageFolder, $filename, 'public');
+            // }
 
             // Create a new Client instance
             $client = new Client;
 
             // Assign values to model attributes
             $client->name = $request->input('name');
-            $client->type = $request->input('type');
+            $client->email = $request->input('email');
+            $client->designation = $request->input('designation');
             $client->website = $request->input('website');
-            $client->score = $request->input('score');
             $client->date = $request->input('date');
-            $client->image_url = isset($imagePath) ? $imagePath : null;
+            // $client->pdf_generated = $request->input('pdf_generated');
             $client->save();
 
             // Return a success response

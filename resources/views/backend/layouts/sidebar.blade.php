@@ -18,12 +18,12 @@
         </a>
         <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="{{ URL::to('/userlist') }}">
+            <a href="{{ URL::to('/client/list') }}">
               <i class="bi bi-circle"></i><span>Clients list</span>
             </a>
           </li>
           <li>
-            <a href="{{ URL::to('/create') }}">
+            <a href="{{ URL::to('/add-client') }}">
               <i class="bi bi-circle"></i><span>Add New</span>
             </a>
           </li>
@@ -38,8 +38,19 @@
       </li>
 
       <li class="nav-item">
+        <a class="nav-link " href="{{ URL::to('/category/list') }}">
+          <i class="bi bi-menu-button-wide"></i><span>Question Category List</span></i>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link " href="{{ URL::to('/factor/list') }}">
-          <i class="bi bi-menu-button-wide"></i><span>Questions</span></i>
+          <i class="bi bi-menu-button-wide"></i><span>Questions List</span></i>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link " href="{{ URL::to('/make-report') }}">
+          <i class="bi bi-menu-button-wide"></i><span>Make Report</span></i>
         </a>
       </li>
 

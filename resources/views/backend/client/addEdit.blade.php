@@ -49,23 +49,19 @@
                                     <input type="text" class="form-control" placeholder="Name" id="name"
                                         name="name" value="{{ isset($client) ? $client->name : '' }}">
                                 </div>
+
                                 <div class="col-md-6">
-                                    <input type="text" class="form-control" placeholder="type" id="type"
-                                        name="type" value="{{ isset($client) ? $client->type : '' }}">
+                                    <input type="text" class="form-control" placeholder="Email" id="email"
+                                        name="email" value="{{ isset($client) ? $client->email : '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" placeholder="Designation" id="designation"
+                                        name="designation" value="{{ isset($client) ? $client->designation : '' }}">
                                 </div>
 
                                 <div class="col-md-6">
-                                    <input type="text" class="form-control" placeholder="website" name="website"
+                                    <input type="text" class="form-control" placeholder="Website" name="website"
                                         value="{{ isset($client) ? $client->website : '' }}">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" placeholder="score" name="score"
-                                        value="{{ isset($client) ? $client->score : '' }}">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <input type="file" class="form-control"  name="image_url">
                                 </div>
 
                                 <div class="col-md-6">
@@ -100,32 +96,37 @@
                     name: {
                         required: true,
                     },
-                    type: {
+                    email: {
                         required: true,
                     },
                     website: {
                         required: true,
                     },
-                    score: {
+                    designation: {
+                        required: true,
+                    },
+                    date: {
                         required: true,
                     },
                 },
                 messages: {
                     // Specify custom error messages
                     website: {
-                        required: "website is required",
+                        required: "Website is required",
+                    },
+                    date: {
+                        required: "Date is required",
+                    },
+                    designation: {
+                        required: "Designation is required",
                     },
                     name: {
                         required: "Name is required",
                     },
-                    type: {
-                        required: "type is required",
-                    },
-                    score: {
-                        required: "score is required",
-                    },
+                    email: {
+                        required: "Email is required",
+                    }
                 },
-                // Specify the submit handler function
                 submitHandler: function(form) {
                     form.submit();
                 }

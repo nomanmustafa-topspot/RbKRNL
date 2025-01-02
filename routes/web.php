@@ -23,6 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/generate-pdf', [PdfController::class, 'generatePDF']);
 Route::get('/edit-pdf', [PdfController::class, 'editPDF']);
 
+Route::get('/category/list', [PdfController::class, 'getCategoryList'])->name('getCategoryList');
+Route::post('/category/save', [PdfController::class, 'saveCategory'])->name('category.save');
 
 Route::get('/factor/list', [PdfController::class, 'getFactorList'])->name('getFactorList');
 Route::post('/factor/save', [PdfController::class, 'saveFactor'])->name('factor.save');
@@ -30,10 +32,13 @@ Route::post('/factor/save', [PdfController::class, 'saveFactor'])->name('factor.
 Route::get('/pdf/list', [PdfController::class, 'getPdfList']);
 Route::post('/upload-pdf', [PdfController::class, 'uploadPDF'])->name('upload.pdf');
 
-
+Route::get('/client/list', [AdminController::class, 'getClientList']);
 Route::get('/add-client', [AdminController::class, 'addClient']);
 Route::post('/save-client', [AdminController::class, 'createClient']);
 Route::post('client-update', [AdminController::class, 'updateUser'])->name('client.update');
+
+//Generate PDF
+Route::get('/make-report', [PdfController::class, 'makeReport']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

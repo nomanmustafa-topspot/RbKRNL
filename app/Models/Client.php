@@ -12,10 +12,10 @@ class Client extends Model
 
     protected $fillable = [
         'name',
-        'type',
+        'email',
+        'designation',
         'website',
-        'image_url',
-        'score',
+        'pdf_generated',
         'date',
     ];
 }

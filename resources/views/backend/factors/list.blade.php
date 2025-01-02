@@ -28,27 +28,22 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-body p-4">
+                        <div class="card-body px-4">
                             <h2 class="card-title">Question Filters</h2>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <select class="form-select form-select" id="filter-type">
                                         <option value="">All Types</option>
-                                        <option value="web-presence">Web Presence</option>
-                                        <option value="seo">SEO</option>
-                                        <option value="site-content">Site Content</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <select class="form-select form-select" id="filter-value">
-                                        <option value="">All Pdf</option>
-                                        @isset($pdfs)
-                                            @foreach ($pdfs as $pdf)
-                                                <option value="{{ $pdf['id'] }}">{{ $pdf['version'] }}</option>
+                                        @if ($categories)
+
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category['id'] }}">{{ $category['name'] }}
+                                                </option>
                                             @endforeach
-                                        @endisset
+                                        @endif
                                     </select>
                                 </div>
+
                             </div>
                         </div>
 
@@ -64,39 +59,41 @@
                             </div>
 
                             <!-- Table with stripped rows -->
-                            <table class="table admin-factors-list" >
+                            <table class="table admin-factors-list">
                                 <thead>
                                     <tr>
                                         <th>Sr #</th>
                                         <th>Factor</th>
                                         <th>Type</th>
-                                        <th>Value</th>
-                                        <th>Result</th>
                                         <th>Created at</th>
                                     </tr>
                                 </thead>
                                 <tbody id="factors-list">
                                     @foreach ($factors as $factor)
-                                        @php
-                                            if ($factor['type'] == 'web-presence') {
-                                                $factor['type'] = 'Web Presence';
-                                            } elseif ($factor['type'] == 'site-content') {
-                                                $factor['type'] = 'Site Content';
-                                            } elseif ($factor['type'] == 'seo') {
-                                                $factor['type'] = 'SEO';
-                                            }
-                                        @endphp
                                         <tr>
                                             <td>{{ $factor['id'] }}</td>
-                                            <td>{{ $factor['factor'] }}</td>
-                                            <td>{{ $factor['type'] }}</td>
-                                            <td>{{ $factor['value'] }}</td>
-                                            <td>{{ $factor['result'] }}</td>
+                                            <td>{{ $factor['text'] }}</td>
+                                            <td>{{ $factor->category['name'] }}</td>
                                             <td>{{ $factor['created_at']->diffForHumans() }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+
+                            <!-- Add Pagination Links -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <!-- Records Count on the Left -->
+                                <div class="text-muted">
+                                    Showing {{ $factors->firstItem() }} to {{ $factors->lastItem() }} of {{ $factors->total() }} results
+                                </div>
+
+                                <!-- Pagination Buttons on the Right -->
+                                <div>
+                                    {{ $factors->links('pagination::bootstrap-5') }}
+                                </div>
+                            </div>
+
+
                             <!-- End Table with stripped rows -->
 
                         </div>
@@ -117,36 +114,29 @@
 
                                         <div class="mb-3">
                                             <label for="factor" class="form-label">Factor</label>
-                                            <input type="text" class="form-control" name="factor" id="factor"
+                                            <input type="text" class="form-control" name="text" id="text"
                                                 required>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label for="type" class="form-label">Question Type</label>
-                                                <select class="form-select" name="type" id="type">
-                                                    <option value="web-presence">Web Presence</option>
-                                                    <option value="seo">SEO</option>
-                                                    <option value="site-content">Site Content</option>
+                                                <select class="form-select" name="category_id" id="category_id">
+                                                    @if ($categories)
+
+                                                        @foreach ($categories as $category)
+                                                            <option value="{{ $category['id'] }}">{{ $category['name'] }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+
                                                 </select>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label for="value" class="form-label">Value</label>
-                                                <input type="number" class="form-control" name="value" id="value"
-                                                    placeholder="1 - 10" min="1" max="10" required>
-                                            </div>
+
+
                                         </div>
                                         <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label for="result" class="form-label">Pdf Version</label>
-                                                <select class="form-select" name="pdf_template_id" id="pdf_template_id">
-                                                    @isset($pdfs)
-                                                        @foreach ($pdfs as $pdf)
-                                                            <option value="{{ $pdf['id'] }}">{{ $pdf['version'] }}</option>
-                                                        @endforeach
-                                                    @endisset
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6">
+
+                                            {{-- <div class="col-md-6">
                                                 <label for="result" class="form-label">Result</label>
 
                                                     <select class="form-select" name="result" id="result" required>
@@ -154,7 +144,7 @@
                                                         <option value="Poor">Poor</option>
                                                         <option value="Average">Average</option>
                                                     </select>
-                                            </div>
+                                            </div> --}}
 
                                         </div>
                                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -172,67 +162,84 @@
 
     <script>
         $(document).ready(function() {
-
+            // Save factor form submission
             $('#saveFactorForm').on('submit', function(e) {
-                e.preventDefault();
-                var formData = new FormData(this);
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).attr('action'),
-                    data: formData,
-                    cache: false,
-                    beforeSend: function() {
-                        // Add filters to the request
-                        formData.append('type', $('#type').val());
-                        formData.append('pdf_template_id', $('#pdf_template_id').val());
-                    },
-                    contentType: false,
-                    processData: false,
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success(response);
-                            $('#verticalycentered').modal('hide');
-                            var newRow = `<tr>
-                            <td>${response.data.id}</td>
-                            <td>${response.data.factor}</td>
-                            <td>${response.data.type}</td>
-                            <td>${response.data.value}</td>
-                            <td>${response.data.result}</td>
-                            <td>${response.data.created_at}</td>
-                          </tr>`;
-                            $('.admin-factors-list tbody').append(newRow);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function(response) {
-                        toastr.error('File upload failed.');
-                    }
-                });
+            e.preventDefault();
+            var formData = new FormData(this);
+            formData.append('type', $('#type').val()); // Add filters before submission
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+
+                success: function(response) {
+
+                if (response.success) {
+                    toastr.success(response.success);
+                    $('#verticalycentered').modal('hide');
+                    $('#saveFactorForm')[0].reset(); // Reset the form
+                    var newRow = `<tr>
+                    <td>${response.data.id}</td>
+                    <td>${response.data.text}</td>
+                    <td>${response.data.type}</td>
+                    <td>${new Date(response.data.created_at).toLocaleString()}</td>
+                    </tr>`;
+                    $('.admin-factors-list tbody').append(newRow);
+                } else {
+                    toastr.error(response.message);
+                }
+                },
+                error: function() {
+                toastr.error('File upload failed.');
+                },
+            });
             });
 
-            function fetchFilteredData() {
+            // Fetch filtered data with pagination
+            function fetchFilteredData(page = 1) {
                 $.ajax({
-                    url: '{{ route('getFactorList') }}', // Adjust the route as needed
+                    url: '{{ route('getFactorList') }}',
                     method: 'GET',
                     data: {
                         type: $('#filter-type').val(),
-                        value: $('#filter-value').val()
+                        page: page, // Include current page
                     },
-                    success: function(response) { // Update the factors list
+                    success: function(response) {
+                        // Replace the table content
                         $('#factors-list').empty();
-                        response.factors.forEach(function(factor) {
-                            $('#factors-list').append('<tr>' + '<td>' + factor.id + '</td>' +
-                                '<td>' + factor.factor + '</td>' + '<td>' + factor.type +
-                                '</td>' + '<td>' + factor.value + '</td>' + '<td>' + factor
-                                .result + '</td>' + '<td>' + new Date(factor.created_at)
-                                .toLocaleString() + '</td>' + '</tr>');
+                        response.factors.data.forEach(function(factor) {
+                            $('#factors-list').append(`
+                                <tr>
+                                    <td>${factor.id}</td>
+                                    <td>${factor.text}</td>
+                                    <td>${factor.category.name}</td>
+                                    <td>${new Date(factor.created_at).toLocaleString()}</td>
+                                </tr>
+                            `);
                         });
-                    }
+
+                        // Update pagination links
+                        $('#pagination-links').html(response.links);
+                    },
+                    error: function() {
+                        toastr.error('Failed to fetch data.');
+                    },
                 });
             }
 
-            $('#filter-type, #filter-value').on('change', function() {
+            // Handle pagination links
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                let page = $(this).attr('href').split('page=')[1];
+                fetchFilteredData(page);
+            });
+
+            // Apply filters
+            $('#filter-type').on('change', function() {
                 fetchFilteredData();
             });
 

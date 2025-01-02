@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Factor;
 use setasign\Fpdi\Fpdi;
+use App\Models\Question;
 use App\Models\PdfTemplate;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\QuesitonCategory;
 
 
 class PdfController extends Controller
@@ -161,43 +164,76 @@ class PdfController extends Controller
 
     public function getFactorList(Request $request)
     {
-        $query = Factor::query();
+        $query = Question::with('category');
 
         if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
+            $query->where('question_category_id', $request->input('type'));
         }
 
-        if ($request->filled('value')) {
-            $query->where('pdf_template_id', $request->input('value'));
-        }
+        $factors = $query->paginate(25);
 
-        $factors = $query->get();
         $pdfs = PdfTemplate::all();
+        $categories = QuesitonCategory::all();
 
         if ($request->ajax()) {
-            return response()->json(['factors' => $factors, 'pdfs' => $pdfs]);
+            return response()->json(['factors' => $factors, 'pdfs' => $pdfs, 'categories' => $categories]);
         }
-
-        return view('backend.factors.list', compact('factors', 'pdfs'));
+        return view('backend.factors.list', compact('factors', 'pdfs', 'categories'));
     }
 
     public function saveFactor(Request $request)
     {
         $request->validate([
-            'factor' => 'required|string|max:255',
-            'type' => 'required|string',
-            'value' => 'required|integer|min:1|max:10',
-            'result' => 'required|string|max:255',
+            'text' => 'required|string|max:255',
+            'category_id' => 'required|exists:question_categories,id', // Validate existence in the database
         ]);
 
-        $factor = new Factor();
-        $factor->pdf_template_id = $request->input('pdf_template_id');
-        $factor->factor = $request->input('factor');
-        $factor->type = $request->input('type');
-        $factor->value = $request->input('value');
-        $factor->result = $request->input('result');
+        // Create a new Question instance
+        $factor = new Question();
+        $factor->question_category_id = $request->input('category_id');
+        $factor->text = $request->input('text');
         $factor->save();
 
-        return response()->json(['success' => 'Factor saved successfully.']);
+        // Load the category relationship for the response
+        $factor->load('category');
+
+        return response()->json([
+            'success' => 'Factor saved successfully.',
+            'data' => [
+                'id' => $factor->id,
+                'text' => $factor->text,
+                'type' => $factor->category->name,
+                'created_at' => $factor->created_at,
+            ],
+        ]);
+    }
+
+    public function getCategoryList()
+    {
+        $categories = QuesitonCategory::all();
+        return view('backend.category.list', compact('categories'));
+    }
+
+    public function saveCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $category = QuesitonCategory::create([
+            'name' => $validated['name'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'newItem' => $category,
+        ]);
+    }
+
+    public function makeReport()
+    {
+        $clients = Client::all();
+        $questions = Question::all();
+      return view('backend.report.add_report', compact('clients', 'questions'));
     }
 }
