@@ -39,6 +39,7 @@ Route::post('client-update', [AdminController::class, 'updateUser'])->name('clie
 
 //Generate PDF
 Route::get('/make-report', [PdfController::class, 'makeReport']);
+Route::post('/save-report', [PdfController::class, 'saveReport'])->name('saveReport');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('pdf_template_id');
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
             $table->string('score')->nullable();
             $table->string('website_image')->nullable();
             $table->timestamp('generated_at');
