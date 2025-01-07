@@ -170,8 +170,8 @@ class PdfController extends Controller
         $ColorstartY = 169;
         $colorWidth = 20;
         $colorHeight = 20;
-        $colorlineHeight = 15.4;
-        $additionalColorHeight = 2;
+        $colorlineHeight = 15;
+        $additionalColorHeight = 0;
         $additionalLineHeight = 4;
         foreach ($questionArray as $category => $questions) {
             if ($category === 'Site Content') {
@@ -192,6 +192,7 @@ class PdfController extends Controller
                     if (strpos($question['question'], 'colors, good') !== false) {
                         $colorWidth = 26;
                         $colorHeight = 15;
+
 
                         if ($question['result'] == 'good') {
                             $resultImage = public_path('assets/img/Green-button-2.png');
@@ -218,7 +219,7 @@ class PdfController extends Controller
                         ];
                     } elseif (strpos($question['question'], 'contact form') !== false) {
                         $colorWidth = 26;
-                        $colorHeight = 15.2;
+                        $colorHeight = 15;
 
                         if ($question['result'] == 'good') {
                             $resultImage = public_path('assets/img/Green-button-2.png');
@@ -230,7 +231,7 @@ class PdfController extends Controller
 
                         [$firstLine, $secondLine] = explode('contact form', $question['question'], 2);
                         $lineHeight = 14.5;
-                        $colorlineHeight = 14.9;
+                        $colorlineHeight = 14.5;
                         $data[$questionPage][] = [
                             'text' => $firstLine . 'contact form',
                             'x' => $startX,
@@ -245,7 +246,9 @@ class PdfController extends Controller
                     } else {
                         $colorWidth = 26;
                         $colorHeight = 12;
-                        $startX = 20;
+                        $additionalColorHeight = 2;
+                        $colorlineHeight = 14.8;
+                        $startX = 19;
                         $data[$questionPage][] = [
                             'text' => $question['question'],
                             'x' => $startX,
@@ -264,7 +267,7 @@ class PdfController extends Controller
 
                         'result_image' => $resultImage,
                         'color_x' => $colorvalueX,
-                        'color_y' => $ColorstartY + ($index) * $colorlineHeight,
+                        'color_y' => $ColorstartY + ($index) * $colorlineHeight + $additionalColorHeight,
                         'color_w' => $colorWidth,
                         'color_h' => $colorHeight
                     ];
