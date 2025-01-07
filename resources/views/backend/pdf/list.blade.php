@@ -108,7 +108,7 @@
         $(document).ready(function() {
 
             $('.datatable-admin-pdf-list').DataTable({
-                dom: 'Bfrtip',
+                dom: 'Bfrtip', 
                 buttons: [
                     'excel',
                 ]
@@ -155,8 +155,7 @@
                     },
                     error: function(response) {
 
-                        swal('Error!',
-                            data.message,
+                        swal('Error!','File Not Upload',
                             'error'
                         );
                     }

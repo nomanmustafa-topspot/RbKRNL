@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PdfTemplate extends Model
 {
-    protected $fillable = ['version', 'name'];
+    protected $table = 'pdf_templates';
+    protected $fillable = ['name','version'] ;
 
     public function factors()
     {

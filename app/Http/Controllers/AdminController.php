@@ -49,7 +49,7 @@ class AdminController extends Controller
         $rules = [
             'name' => 'required|string|max:255',   // Name validation
             'designation' => 'required|string|max:100', // Designation validation
-            'website' => 'required|url',          // Website validation
+            'website' => 'required',          // Website validation
             'date' => 'required|date',            // Date validation
         ];
 

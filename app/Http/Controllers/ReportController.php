@@ -129,6 +129,7 @@ class ReportController extends Controller
             'date' => $client ? $client->date : null,
             'score' => $report->score,
             'website_image' => $report->website_image,
+            'pdf_template_id' =>  $data['pdf_template_id'],
         ];
         $response =   $this->pdfController->editPDF($categorizedQuestions, $clientData);
         // return $response;

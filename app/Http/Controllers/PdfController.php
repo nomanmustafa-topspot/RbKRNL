@@ -17,8 +17,9 @@ class PdfController extends Controller
 
     public function editPDF($questionArray, $clientInfo)
     {
-        $pdf_template = PdfTemplate::find(1);
+        $pdf_template = PdfTemplate::find($clientInfo['pdf_template_id']);
         $pathToPdf = public_path('pdf/' . $pdf_template->name);
+
         if (!file_exists($pathToPdf)) {
             // Debugging line, file not found
             dd("Template file does not exist: " . $pathToPdf);
@@ -418,7 +419,8 @@ class PdfController extends Controller
 
     public function uploadPDF(Request $request)
     {
-        $request->validate(['pdf' => 'required|mimes:pdf|max:2048',]);
+        ini_set('memory_limit', '-1');
+        $request->validate(['pdf' => 'required|mimes:pdf',]);
         if ($request->file('pdf')) {
             $pdfFolderPath = public_path('pdf');
             if (!file_exists($pdfFolderPath)) {
