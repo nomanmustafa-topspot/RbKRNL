@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Client;
+use App\Models\Report;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,9 @@ class AdminController extends Controller
     public function userDashboard(){
 
         $user = auth()->user();
-        return view('backend.dashboard', compact('user'));
+        $clinetsCount = Client::count();
+        $reportsCount = Report::distinct('client_id')->count('client_id');
+        return view('backend.dashboard', compact('user', 'clinetsCount', 'reportsCount'));
     }
 
     public function addClient(){
@@ -43,51 +46,47 @@ class AdminController extends Controller
     public function createClient(Request $request)
     {
         // Validation rules
-        // $rules = [
-        //     'name' => 'required|string|max:255',  // Name validation
-        //     'type' => 'required|string|max:100',  // Type validation
-        //     'website' => 'required|url',         // Website validation
-        //     'image_url' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
-        //     'score' => 'required|numeric',       // Score validation
-        //     'date' => 'required|date',           // Date validation
-        // ];
+        $rules = [
+            'name' => 'required|string|max:255',   // Name validation
+            'designation' => 'required|string|max:100', // Designation validation
+            'website' => 'required|url',          // Website validation
+            'date' => 'required|date',            // Date validation
+        ];
 
-        // // Validate incoming request
-        // $request->validate($rules);
+        // Validate the incoming request
+        $request->validate($rules);
 
         try {
-            // if ($request->hasFile('image_url')) {
-            //     $imageFolder = 'images';
-            //     $storagePath = storage_path('app/public/' . $imageFolder);
-
-            //     if (!is_dir($storagePath)) {
-            //         mkdir($storagePath, 0755, true);
-            //     }
-            //     $filename = Str::uuid() . '.' . $request->file('image_url')->getClientOriginalExtension();
-
-            //     // Store the image with the new unique filename
-            //     $imagePath = $request->file('image_url')->storeAs($imageFolder, $filename, 'public');
-            // }
-
             // Create a new Client instance
-            $client = new Client;
-
-            // Assign values to model attributes
+            $client = new Client();
             $client->name = $request->input('name');
             $client->email = $request->input('email');
             $client->designation = $request->input('designation');
             $client->website = $request->input('website');
             $client->date = $request->input('date');
-            // $client->pdf_generated = $request->input('pdf_generated');
             $client->save();
 
-            // Return a success response
-            return redirect()->back()->with('success', 'Client created successfully.');
+            // Check if the request is AJAX
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'newItem' => $client,
+                    'message' => 'Client created successfully.',
+                ]);
+            }
+
+
         } catch (\Throwable $th) {
-            // Handle error
-            return redirect()->back()->with('error', 'Error creating Client: ' . $th->getMessage());
+            // Handle errors
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating Client: ' . $th->getMessage(),
+                ], 500);
+            }
         }
     }
+
 
     public function edit($id)
     {
@@ -140,5 +139,15 @@ class AdminController extends Controller
             // Handle exceptions, log the error, or customize the error message as needed
             return redirect()->back()->with('error', 'Failed to update user: ' . $e->getMessage());
         }
+    }
+
+    public function deleteClient(Request $request)
+    {
+        $client = Client::find($request->input('id'));
+        if ($client) {
+            $client->delete();
+            return response()->json(['success' => 'Client deleted successfully.']);
+        }
+        return response()->json(['error' => 'Client not found.'], 404);
     }
 }

@@ -22,3 +22,5 @@ yarn-error.log
 /.vscode
 /.zed
 /public/images
+/public/generated
+/public/pdf

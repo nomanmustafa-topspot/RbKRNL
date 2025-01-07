@@ -7,6 +7,8 @@
             height: 35px;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.all.min.js"></script>
 
     <main id="main" class="main">
         @if (session('success'))
@@ -66,15 +68,21 @@
                                         <th>Factor</th>
                                         <th>Type</th>
                                         <th>Created at</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="factors-list">
                                     @foreach ($factors as $factor)
-                                        <tr>
+                                        <tr id="factor-{{ $factor['id'] }}">
                                             <td>{{ $factor['id'] }}</td>
                                             <td>{{ $factor['text'] }}</td>
                                             <td>{{ $factor->category['name'] }}</td>
                                             <td>{{ $factor['created_at']->diffForHumans() }}</td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm delete-factor" data-id="{{ $factor['id'] }}">
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -131,21 +139,6 @@
 
                                                 </select>
                                             </div>
-
-
-                                        </div>
-                                        <div class="row mb-3">
-
-                                            {{-- <div class="col-md-6">
-                                                <label for="result" class="form-label">Result</label>
-
-                                                    <select class="form-select" name="result" id="result" required>
-                                                        <option value="Good">Good</option>
-                                                        <option value="Poor">Poor</option>
-                                                        <option value="Average">Average</option>
-                                                    </select>
-                                            </div> --}}
-
                                         </div>
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </form>
@@ -182,11 +175,16 @@
                     toastr.success(response.success);
                     $('#verticalycentered').modal('hide');
                     $('#saveFactorForm')[0].reset(); // Reset the form
-                    var newRow = `<tr>
-                    <td>${response.data.id}</td>
-                    <td>${response.data.text}</td>
-                    <td>${response.data.type}</td>
-                    <td>${new Date(response.data.created_at).toLocaleString()}</td>
+                    var newRow = `<tr id="factor-${response.data.id}">
+                        <td>${response.data.id}</td>
+                        <td>${response.data.text}</td>
+                        <td>${response.data.type}</td>
+                        <td>${new Date(response.data.created_at).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-factor" data-id="${response.data.id}">
+                                Delete
+                            </button>
+                        </td>
                     </tr>`;
                     $('.admin-factors-list tbody').append(newRow);
                 } else {
@@ -213,11 +211,16 @@
                         $('#factors-list').empty();
                         response.factors.data.forEach(function(factor) {
                             $('#factors-list').append(`
-                                <tr>
+                                <tr id="factor-${factor.id}">
                                     <td>${factor.id}</td>
                                     <td>${factor.text}</td>
                                     <td>${factor.category.name}</td>
                                     <td>${new Date(factor.created_at).toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm delete-factor" data-id="${factor.id}">
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             `);
                         });
@@ -245,6 +248,50 @@
 
             // Initial fetch
             fetchFilteredData();
+
+            $(document).on('click', '.delete-factor', function() {
+
+                let factorId = $(this).data('id');
+                swal({
+                    text: "Are you sure you want to delete this factor?",
+                    type: "warning",
+                    confirmButtonText: "Yes",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
+                        $.ajax({
+                            url: '/factor/delete/',
+                            type: 'POST',
+                            data: {
+                                id: factorId
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(data) {
+                                if (data.success) {
+                                    // Remove the row from the table
+                                    $('#factor-' + factorId).remove();
+                                    swal('Success', 'Factor deleted successfully!', 'success');
+                                } else {
+                                    swal('Error!',
+                                         data.message,
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle AJAX error
+                                swal('Error!', 'An error occurred while deleting the Factor. Please try again.', 'error');
+                                console.error('Error:', error);
+                            }
+                        });
+                    } else if (result.dismiss === 'cancel') {
+                        swal('Cancelled', 'You stayed here :)',
+                            'error');
+                    }
+                });
+            });
         });
     </script>
 

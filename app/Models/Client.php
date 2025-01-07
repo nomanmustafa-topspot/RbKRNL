@@ -18,4 +18,9 @@ class Client extends Model
         'pdf_generated',
         'date',
     ];
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }

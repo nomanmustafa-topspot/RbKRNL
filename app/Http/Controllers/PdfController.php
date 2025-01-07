@@ -2,30 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
-use App\Models\Factor;
-use App\Models\Report;
 use setasign\Fpdi\Fpdi;
 use App\Models\Question;
 use App\Models\PdfTemplate;
-use Illuminate\Support\Str;
-use App\Models\ClientAnswer;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\QuesitonCategory;
-use Illuminate\Support\Facades\URL;
+use App\Models\QuesitonCategory;;
+use Illuminate\Support\Facades\File;
+
 
 
 class PdfController extends Controller
 {
-    public function generatePDF()
-    {
-        $data = ['name' => 'John Doe', 'type' => 'Example Type', 'image' => 'path/to/image.jpg', 'website' => 'https://example.com', 'score' => 85];
-        $pdf = Pdf::loadView('backend.template.v1.pdf_template', $data);
-        return $pdf->download('document.pdf');
-    }
 
-    public function editPDF($questionArray , $clientInfo)
+    public function editPDF($questionArray, $clientInfo)
     {
         $pdf_template = PdfTemplate::find(1);
         $pathToPdf = public_path('pdf/' . $pdf_template->name);
@@ -34,7 +24,7 @@ class PdfController extends Controller
             dd("Template file does not exist: " . $pathToPdf);
         }
 
-        $pdf = new FPDI(); // Set the source file
+        $pdf = new FPDI();
         $pageCount = $pdf->setSourceFile($pathToPdf);
         if ($pageCount <= 0) {
             dd("No pages found in the template.");
@@ -55,7 +45,7 @@ class PdfController extends Controller
 
                 'website' => $clientInfo['website'],
                 'website_x' => 49,
-                'website_y' => 261
+                'website_y' => 260
             ],
 
             2 => [
@@ -67,9 +57,9 @@ class PdfController extends Controller
                 'type2_x' => 45,
                 'type2_y' => 54,
 
-                'score' => $clientInfo['score'].'/100',
-                'score_x' => 116,
-                'score_y' => 222,
+                'score' => $clientInfo['score'] . '/100',
+                'score_x' => 117,
+                'score_y' => 222.5,
 
                 'image' => $clientInfo['website_image'],
                 'img_x' => 37.8,
@@ -77,25 +67,31 @@ class PdfController extends Controller
                 'img_w' => 141,
                 'img_h' => 80
             ],
-            // Add more pages as needed
         ];
+
         $questionPage = 3;
         $startX = 21;
         $startvalueX = 153;
-        $resultvalueX = 178;
-        $startY = 102;
-        $lineHeight = 15;
+        $resultvalueX = 176.5;
+        $startY = 103;
+        $colorvalueX = 171.5;
+        $ColorstartY = 98;
+        $colorWidth = 25.8;
+        $colorHeight = 11.5;
+        $colorlineHeight = 14.1;
+        $lineHeight = 14.1;
 
         foreach ($questionArray as $category => $questions) {
             if ($category === 'Web Presence') {
                 foreach ($questions as $index => $question) {
                     if ($question['result'] == 'good') {
-                        $color = [0, 128, 0]; // Green (RGB)
+                        $resultImage = public_path('assets/img/Greenbutton.png');
                     } elseif ($question['result'] == 'average') {
-                        $color = [255, 255, 0]; // Yellow (RGB)
+                        $resultImage = public_path('assets/img/Yellowbutton.png');
                     } else {
-                        $color = [255, 0, 0]; // Red (RGB)
+                        $resultImage = public_path('assets/img/Redbutton.png');
                     }
+
                     $data[$questionPage][] = [
                         'text' => $question['question'],
                         'x' => $startX,
@@ -105,15 +101,15 @@ class PdfController extends Controller
                         'value_x' => $startvalueX,
                         'value_y' => $startY + ($index) * $lineHeight,
 
-                        'result' => ucfirst($question['result']), // The result (e.g., good, average, poor)
+                        'result' => ucfirst($question['result']),
                         'result_x' => $resultvalueX,
                         'result_y' => $startY + ($index) * $lineHeight,
 
-                        'color' => $color,
-                        'color_x' => $resultvalueX,
-                        'color_y' => $startY + ($index) * $lineHeight,
-                        'color_w' => 20,
-                        'color_h' => 20
+                        'result_image' => $resultImage,
+                        'color_x' => $colorvalueX,
+                        'color_y' => $ColorstartY + ($index) * $colorlineHeight,
+                        'color_w' => $colorWidth,
+                        'color_h' => $colorHeight,
                     ];
                 }
             }
@@ -122,18 +118,23 @@ class PdfController extends Controller
         $questionPage = 4;
         $startX = 21;
         $startvalueX = 153;
-        $resultvalueX = 178;
-        $startY = 53;
-        $lineHeight = 15;
+        $resultvalueX = 176.5;
+        $startY = 54.5;
+        $colorvalueX = 172;
+        $ColorstartY = 49;
+        $colorWidth = 25;
+        $colorHeight = 11.5;
+        $colorlineHeight = 14.1;
+        $lineHeight = 14.1;
         foreach ($questionArray as $category => $questions) {
             if ($category === 'SEO') {
                 foreach ($questions as $index => $question) {
                     if ($question['result'] == 'good') {
-                        $color = [0, 128, 0]; // Green (RGB)
+                        $resultImage = public_path('assets/img/Greenbutton.png');
                     } elseif ($question['result'] == 'average') {
-                        $color = [255, 255, 0]; // Yellow (RGB)
+                        $resultImage = public_path('assets/img/Yellowbutton.png');
                     } else {
-                        $color = [255, 0, 0]; // Red (RGB)
+                        $resultImage = public_path('assets/img/Redbutton.png');
                     }
                     $data[$questionPage][] = [
                         'text' => $question['question'],
@@ -144,50 +145,70 @@ class PdfController extends Controller
                         'value_x' => $startvalueX,
                         'value_y' => $startY + ($index) * $lineHeight,
 
-                        'result' => $question['result'], // The result (e.g., good, average, poor)
+                        'result' => ucfirst($question['result']),
                         'result_x' => $resultvalueX,
                         'result_y' => $startY + ($index) * $lineHeight,
 
-                        'color' => $color,
-                        'color_x' => $resultvalueX,
-                        'color_y' => $startY + ($index) * $lineHeight,
-                        'color_w' => 20,
-                        'color_h' => 20
+                        'result_image' => $resultImage,
+                        'color_x' => $colorvalueX,
+                        'color_y' => $ColorstartY + ($index) * $colorlineHeight,
+                        'color_w' => $colorWidth,
+                        'color_h' => $colorHeight
                     ];
                 }
             }
         }
 
         $questionPage = 4;
-        $startX = 21;
+        $startX = 20.5;
         $startvalueX = 153;
-        $resultvalueX = 178;
-        $startY = 176;
-        $lineHeight = 15;
-        $additionalLineHeight = 5;
+        $resultvalueX = 176.5;
+        $startY = 175;
+        $lineHeight = 15.4;
+        $colorvalueX = 171;
+        $ColorstartY = 169;
+        $colorWidth = 20;
+        $colorHeight = 20;
+        $colorlineHeight = 15.4;
+        $additionalColorHeight = 2;
+        $additionalLineHeight = 4;
         foreach ($questionArray as $category => $questions) {
             if ($category === 'Site Content') {
                 foreach ($questions as $index => $question) {
 
                     if ($question['result'] == 'good') {
-                        $color = [0, 128, 0]; // Green (RGB)
+                        $resultImage = public_path('assets/img/Greenbutton.png');
                     } elseif ($question['result'] == 'average') {
-                        $color = [255, 255, 0]; // Yellow (RGB)
+                        $resultImage = public_path('assets/img/Yellowbutton.png');
                     } else {
-                        $color = [255, 0, 0]; // Red (RGB)
+                        $resultImage = public_path('assets/img/Redbutton.png');
                     }
+
                     $value_y = $startY + ($index) * $lineHeight;
                     $result_y = $value_y;
 
                     // Check for specific phrases to break lines
                     if (strpos($question['question'], 'colors, good') !== false) {
+                        $colorWidth = 26;
+                        $colorHeight = 15;
+
+                        if ($question['result'] == 'good') {
+                            $resultImage = public_path('assets/img/Green-button-2.png');
+                        } elseif ($question['result'] == 'average') {
+                            $resultImage = public_path('assets/img/Yellow-button-2.png');
+                        } else {
+                            $resultImage = public_path('assets/img/Red-button-2.png');
+                        }
+
                         [$firstLine, $secondLine] = explode('colors, good', $question['question'], 2);
 
                         $data[$questionPage][] = [
                             'text' => $firstLine . 'colors, good',
                             'x' => $startX,
                             'y' => $startY + ($index) * $lineHeight,
+
                         ];
+                        $lineHeight = 15.5;
 
                         $data[$questionPage][] = [
                             'text' => trim($secondLine),
@@ -195,20 +216,35 @@ class PdfController extends Controller
                             'y' => $startY + ($index) * $lineHeight + $additionalLineHeight,
                         ];
                     } elseif (strpos($question['question'], 'contact form') !== false) {
-                        [$firstLine, $secondLine] = explode('contact form', $question['question'], 2);
+                        $colorWidth = 26;
+                        $colorHeight = 15.2;
 
+                        if ($question['result'] == 'good') {
+                            $resultImage = public_path('assets/img/Green-button-2.png');
+                        } elseif ($question['result'] == 'average') {
+                            $resultImage = public_path('assets/img/Yellow-button-2.png');
+                        } else {
+                            $resultImage = public_path('assets/img/Red-button-2.png');
+                        }
+
+                        [$firstLine, $secondLine] = explode('contact form', $question['question'], 2);
+                        $lineHeight = 14.5;
+                        $colorlineHeight = 14.9;
                         $data[$questionPage][] = [
                             'text' => $firstLine . 'contact form',
                             'x' => $startX,
                             'y' => $startY + ($index) * $lineHeight,
                         ];
-
+                        $lineHeight = 15.1;
                         $data[$questionPage][] = [
                             'text' => trim($secondLine),
                             'x' => $startX,
                             'y' => $startY + ($index) * $lineHeight + $additionalLineHeight,
                         ];
                     } else {
+                        $colorWidth = 26;
+                        $colorHeight = 12;
+                        $startX = 20;
                         $data[$questionPage][] = [
                             'text' => $question['question'],
                             'x' => $startX,
@@ -216,35 +252,33 @@ class PdfController extends Controller
                         ];
                     }
 
-                    // Add the value and result aligned with the first line
                     $data[$questionPage][] = [
                         'value' => $question['value'],
                         'value_x' => $startvalueX,
                         'value_y' => $value_y,
 
-                        'result' => $question['result'],
+                        'result' => ucfirst($question['result']),
                         'result_x' => $resultvalueX,
                         'result_y' => $result_y,
-                        'color' => $color,
 
-                        'color_x' => $resultvalueX,
-                        'color_y' => $startY + ($index) * $lineHeight,
-                        'color_w' => 20,
-                        'color_h' => 20
+                        'result_image' => $resultImage,
+                        'color_x' => $colorvalueX,
+                        'color_y' => $ColorstartY + ($index) * $colorlineHeight,
+                        'color_w' => $colorWidth,
+                        'color_h' => $colorHeight
                     ];
                 }
             }
         }
 
-        // Loop through all pages
         for ($i = 1; $i <= $pageCount; $i++) {
             $templateId = $pdf->importPage($i);
             $pdf->AddPage();
-            $pdf->useTemplate($templateId); // Check if there is any text to add on this page
+            $pdf->useTemplate($templateId);
             if (isset($data[$i])) {
 
 
-                   // Check and add name
+                // Check and add name
                 if (isset($data[$i]['name'])) {
                     $pdf->SetFont('helvetica', 'B', 22);
                     $pdf->SetTextColor(255, 255, 255); // White text for visibility
@@ -268,7 +302,7 @@ class PdfController extends Controller
                 }
 
 
-                 // Add website
+                // Add website
                 if (isset($data[$i]['website'])) {
                     $pdf->SetFont('helvetica', '', 16);
                     $pdf->SetXY($data[$i]['website_x'], $data[$i]['website_y']);
@@ -331,20 +365,48 @@ class PdfController extends Controller
                     }
 
                     if (isset($item['result'])) {
-                        $pdf->SetFillColor($item['color'][0], $item['color'][1], $item['color'][2]); // RGB
-                        $pdf->Rect($item['result_x'] - 2, $item['result_y'] - 4, 20, 6, 'F');
                         $pdf->SetFont('helvetica', '', 12);
                         $pdf->SetTextColor(0, 0, 0);
                         $pdf->SetXY($item['result_x'], $item['result_y']);
                         $pdf->Write(0, $item['result']);
-                    }
 
+                        // Add the result image if available
+                        if (isset($item['result_image'])) {
+
+                            $pdf->Image(
+                                $item['result_image'],
+                                $item['color_x'],
+                                $item['color_y'],
+                                $item['color_w'],
+                                $item['color_h']
+                            );
+
+                            $pdf->SetXY($item['result_x'], $item['result_y']);
+                            $pdf->SetFont('helvetica', 'B', 12);
+                            $pdf->SetTextColor(255, 255, 255);
+                            $pdf->Write(0, $item['result']);
+                        }
+                    }
                 }
-                // echo 'Data: <pre>' .print_r($pdf,true). '</pre>'; die;
             }
         } // Output the edited PDF
+
         $outputName = $clientInfo['client'] . "_edited.pdf";
-        return response($pdf->Output('S', $outputName))->header('Content-Type', 'application/pdf');
+        $outputName = $clientInfo['client'] . "_" . now()->timestamp . "_edited.pdf";
+        $path = public_path('generated/' . $outputName);
+        // Ensure the 'generated' directory exists
+        if (!File::exists(public_path('generated'))) {
+            File::makeDirectory(public_path('generated'), 0755, true);
+        }
+        $pdfContent = $pdf->Output('S', $outputName); // Get the PDF content as a string
+        File::put($path, $pdfContent);
+        // $outputName = $clientInfo['client'] . "_edited.pdf";
+
+        return response()->json([
+            'message' => 'PDF successfully saved.',
+            'path' => $outputName,
+        ]);
+        // return response($pdf->Output('S', $outputName))->header('Content-Type', 'application/pdf');
     }
 
     public function getPdfList()
@@ -373,9 +435,34 @@ class PdfController extends Controller
             $pdfTemplate->name = $fileName;
             $pdfTemplate->version = $newVersion;
             $pdfTemplate->save();
-            return response()->json(['success' => 'PDF uploaded successfully. Version: ' . $newVersion]);
+
+            return response()->json([
+             'success' =>true,
+             'newItem' => $pdfTemplate,
+             'message' => 'PDF uploaded successfully. Version: ' . $newVersion]);
         }
-        return response()->json(['error' => 'File upload failed.'], 500);
+        return response()->json(['error' => true, 'message' => 'File upload failed.'], 500);
+    }
+
+    public function deletePDF(Request $request)
+    {
+        $pdfTemplate = PdfTemplate::find($request->input('id'));
+
+        if ($pdfTemplate) {
+            // Construct the file path
+            $filePath = public_path('pdf/' . $pdfTemplate->name);
+
+            if (File::exists($filePath)) {
+                File::delete($filePath);
+            }
+
+            // Delete the database record
+            $pdfTemplate->delete();
+
+            return response()->json(['success' => true, 'message' => 'PDF deleted successfully.']);
+        }
+
+        return response()->json(['error' => true, 'message' => 'PDF not found.'], 404);
     }
 
     public function getFactorList(Request $request)
@@ -396,6 +483,17 @@ class PdfController extends Controller
         }
         return view('backend.factors.list', compact('factors', 'pdfs', 'categories'));
     }
+
+    public function deleteFactor(Request $request)
+    {
+        $factor = Question::find($request->input('id'));
+        if ($factor) {
+            $factor->delete();
+            return response()->json(['success' => 'Factor deleted successfully.']);
+        }
+        return response()->json(['error' => 'Factor not found.'], 404);
+    }
+
 
     public function saveFactor(Request $request)
     {
@@ -446,92 +544,13 @@ class PdfController extends Controller
         ]);
     }
 
-    public function makeReport()
+    public function deleteCategory(Request $request)
     {
-        $clients = Client::all();
-        $questions = Question::all();
-        $pdfs = PdfTemplate::all();
-        $categories = QuesitonCategory::with('questions')->get();
-      return view('backend.report.add_report', compact('clients', 'questions', 'categories', 'pdfs'));
-    }
-
-
-    public function saveReport(Request $request)
-    {
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'pdf_template_id' => 'required|exists:pdf_templates,id',
-            'questions' => 'required|array',
-            'questions.*.result' => 'required|in:good,average,poor',
-            'questions.*.value' => 'required|numeric',
-        ]);
-
-        // Handle image upload
-        $imagePath = null;
-        if ($request->hasFile('image_url')) {
-            $imageFolder = 'images';
-            $destinationPath = public_path($imageFolder);
-
-            if (!is_dir($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            $filename = Str::uuid() . '.' . $request->file('image_url')->getClientOriginalExtension();
-            $request->file('image_url')->move($destinationPath, $filename);
-            $imagePath = $imageFolder . '/' . $filename;
+        $category = QuesitonCategory::find($request->input('id'));
+        if ($category) {
+            $category->delete();
+            return response()->json(['success' => 'Category deleted successfully.']);
         }
-
-        // Prepare the client answer array
-        $categorizedQuestions = [];
-        foreach ($data['questions'] as $questionId => $questionData) {
-            // Create the ClientAnswer entry
-            $clientAnswer = ClientAnswer::create([
-                'client_id' => $data['client_id'],
-                'question_id' => $questionId,
-                'value' => $questionData['value'],
-                'result' => $questionData['result'],
-            ]);
-
-            // Fetch the question text for each client answer
-            $question = Question::with('category')->find($questionId);
-            if ($question && $question->category) {
-                $categoryName = $question->category->name;
-                $categorizedQuestions[$categoryName][] = [
-                    'id' => $clientAnswer->id,
-                    'question_id' => $clientAnswer->question_id,
-                    'question' => $question->text,
-                    'value' => $clientAnswer->value,
-                    'result' => $clientAnswer->result,
-                ];
-            }
-        }
-
-        // Create the report entry
-        $client = Client::find($data['client_id']);
-        $report = Report::create([
-            'client_id' => $data['client_id'],
-            'pdf_template_id' => $data['pdf_template_id'],
-            'file_path' => null,
-            'score' => $request->input('website_score'),
-            'website_image' => $imagePath,
-            'generated_at' => now(),
-        ]);
-
-        // Add the report data to the array
-        $clientData = [
-            'id' => $report->id,
-            'client' => $client ? $client->name : null,
-            'designition' => $client ? $client->designation : null,
-            'website' => $client ? $client->website : null,
-            'date' => $client ? $client->date : null,
-            'score' => $report->score,
-            'website_image' => $report->website_image,
-        ];
-        // return response()->json(['success' => 'Report saved successfully.', 'data' => $categorizedQuestions, 'clientData' => $clientData]);
-          $response =   $this->editPDF($categorizedQuestions , $clientData);
-        return $response;
+        return response()->json(['error' => 'Category not found.'], 404);
     }
-
-
-
 }

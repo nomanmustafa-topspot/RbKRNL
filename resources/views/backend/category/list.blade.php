@@ -8,6 +8,9 @@
         }
     </style>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.all.min.js"></script>
+
     <main id="main" class="main">
         @if (session('success'))
             <div class="alert alert-success bg-success text-light border-0 alert-dismissible fade show" role="alert">
@@ -39,20 +42,26 @@
                             </div>
 
                             <!-- Table with stripped rows -->
-                            <table class="table admin-factors-list">
+                            <table class="table admin-category-list">
                                 <thead>
                                     <tr>
                                         <th>Sr #</th>
                                         <th>Name</th>
                                         <th>Created at</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="factors-list">
+                                <tbody id="category-list">
                                     @foreach ($categories as $category)
-                                        <tr>
+                                        <tr id="category-{{ $category['id'] }}">
                                             <td>{{ $category['id'] }}</td>
                                             <td>{{ $category['name'] }}</td>
                                             <td>{{ $category['created_at']->diffForHumans() }}</td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm delete-category" data-id="{{ $category['id'] }}">
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -113,12 +122,17 @@
                     success: function(data) {
                         if (data.success) {
                             // Append new data to the table
-                            let table = $('.admin-factors-list tbody');
+                            let table = $('.admin-category-list tbody');
                             let newRow = `
-                                    <tr>
+                                    <tr id="category-${data.newItem.id}">
                                         <td>${data.newItem.id}</td>
                                         <td>${data.newItem.name}</td>
-                                          <td>${moment(data.newItem.created_at).fromNow()}</td>
+                                        <td>${moment(data.newItem.created_at).fromNow()}</td>
+                                        <td>
+                                            <button class="btn btn-danger btn-sm delete-category" data-id="${data.newItem.id}">
+                                                Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                 `;
                             table.append(newRow);
@@ -131,6 +145,45 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
+                    }
+                });
+            });
+
+            $(document).on('click', '.delete-category', function() {
+                let categoryId = $(this).data('id');
+
+                swal({
+                    text: "Are you sure you want to delete this category?",
+                    type: "warning",
+                    confirmButtonText: "Yes",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
+                        $.ajax({
+                            url: '/category/delete/',
+                            type: 'POST',
+                            data: {
+                                id: categoryId
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(data) {
+                                if (data.success) {
+                                    debugger
+                                    $('#category-' + categoryId).remove();
+                                    swal('Success', 'Category deleted successfully!', 'success');
+                                } else {
+                                    swal('Error!', data.message, 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                swal('Error!', 'An error occurred while deleting the category. Please try again.', 'error');
+                                console.error('Error:', error);
+                            }
+                        });
+                    } else if (result.dismiss === 'cancel') {
+                        swal('Cancelled', 'You stayed here :)', 'error');
                     }
                 });
             });
