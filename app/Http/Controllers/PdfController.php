@@ -288,7 +288,7 @@ class PdfController extends Controller
 
                 // Check and add name
                 if (isset($data[$i]['name'])) {
-                    $pdf->SetFont('helvetica', 'B', 22);
+                    $pdf->SetFont('helvetica', 'B', 17);
                     $pdf->SetTextColor(255, 255, 255); // White text for visibility
                     $pdf->SetXY($data[$i]['x'], $data[$i]['y']);
                     $pdf->Write(0, $data[$i]['name']);
@@ -296,7 +296,7 @@ class PdfController extends Controller
 
                 // Check and add type
                 if (isset($data[$i]['type'])) {
-                    $pdf->SetFont('helvetica', 'B', 22.5);
+                    $pdf->SetFont('helvetica', 'B', 16);
                     $pdf->SetTextColor(255, 255, 255); // White text for visibility
                     $pdf->SetXY($data[$i]['type_x'], $data[$i]['type_y']);
                     $pdf->Write(0, $data[$i]['type']);
