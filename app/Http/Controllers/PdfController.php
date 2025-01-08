@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
 use setasign\Fpdi\Fpdi;
 use App\Models\Question;
 use App\Models\PdfTemplate;
@@ -24,6 +25,9 @@ class PdfController extends Controller
             // Debugging line, file not found
             dd("Template file does not exist: " . $pathToPdf);
         }
+        $date = $clientInfo['date'];
+        $dateObject = new DateTime($date);
+        $clientDate = $dateObject->format('F d, Y');
 
         $pdf = new FPDI();
         $pageCount = $pdf->setSourceFile($pathToPdf);
@@ -40,13 +44,13 @@ class PdfController extends Controller
                 'type_x' => 10.5,
                 'type_y' => 150,
 
-                'date' =>  $clientInfo['date'],
+                'date' =>  $clientDate,
                 'date_x' => 40,
-                'date_y' => 249,
+                'date_y' => 249.3,
 
                 'website' => $clientInfo['website'],
                 'website_x' => 49,
-                'website_y' => 260
+                'website_y' => 260.2
             ],
 
             2 => [

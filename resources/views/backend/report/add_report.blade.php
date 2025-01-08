@@ -116,7 +116,7 @@
                                                         <div class="col-md-2">
                                                             <input type="number" class="form-control"
                                                                 name="questions[{{ $question->id }}][value]"
-                                                                placeholder="(1-10)" min="1" max="10">
+                                                                placeholder="(0-10)" min="0" max="10">
                                                         </div>
                                                         <div class="col-md-3">
                                                             <select class="form-select"
@@ -246,12 +246,12 @@
                 $(this).rules("add", {
                     required: true,
                     number: true,
-                    min: 1,
+                    min: 0,
                     max: 10,
                     messages: {
-                        required: "Please enter a score between 1 and 10.",
+                        required: "Please enter a score between 0 and 10.",
                         number: "Please enter a valid number.",
-                        min: "Minimum score is 1.",
+                        min: "Minimum score is 0.",
                         max: "Maximum score is 10."
                     }
                 });
