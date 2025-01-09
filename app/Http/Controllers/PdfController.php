@@ -55,12 +55,15 @@ class PdfController extends Controller
 
             2 => [
                 'name_2' => $clientInfo['client'],
-                'x' => 62.5,
+                'x' => 64,
                 'y' => 39.5,
+                'max_width' => 100,
+                
 
                 'type_2' => $clientInfo['designition'],
-                'type2_x' => 45,
+                'type2_x' => 43,
                 'type2_y' => 54,
+                'type_max_width' => 90,
 
                 'score' => $clientInfo['score'] . '/100',
                 'score_x' => 117,
@@ -278,7 +281,7 @@ class PdfController extends Controller
                 }
             }
         }
-
+        $pageWidth = 210;
         for ($i = 1; $i <= $pageCount; $i++) {
             $templateId = $pdf->importPage($i);
             $pdf->AddPage();
@@ -288,7 +291,7 @@ class PdfController extends Controller
 
                 // Check and add name
                 if (isset($data[$i]['name'])) {
-                    $pdf->SetFont('helvetica', 'B', 17);
+                    $pdf->SetFont('helvetica', 'B', 16);
                     $pdf->SetTextColor(255, 255, 255); // White text for visibility
                     $pdf->SetXY($data[$i]['x'], $data[$i]['y']);
                     $pdf->Write(0, $data[$i]['name']);
@@ -296,7 +299,7 @@ class PdfController extends Controller
 
                 // Check and add type
                 if (isset($data[$i]['type'])) {
-                    $pdf->SetFont('helvetica', 'B', 16);
+                    $pdf->SetFont('helvetica', 'B', 14);
                     $pdf->SetTextColor(255, 255, 255); // White text for visibility
                     $pdf->SetXY($data[$i]['type_x'], $data[$i]['type_y']);
                     $pdf->Write(0, $data[$i]['type']);
@@ -319,17 +322,23 @@ class PdfController extends Controller
 
                 // Add second name
                 if (isset($data[$i]['name_2'])) {
-                    $pdf->SetFont('helvetica', 'B', 33);
+                    $pdf->SetFont('helvetica', 'B', 25);
                     $pdf->SetTextColor(0, 0, 0); // Black text for visibility
-                    $pdf->SetXY($data[$i]['x'], $data[$i]['y']);
+                    $textWidth = $pdf->GetStringWidth($data[$i]['name_2']);
+                    $x = ($pageWidth - $textWidth) / 2; // Center align horizontally
+                    $pdf->SetXY($x, $data[$i]['y']);
+                    // $pdf->SetXY($data[$i]['x'], $data[$i]['y']);
                     $pdf->Write(0, $data[$i]['name_2']);
                 }
 
                 // Add second type
                 if (isset($data[$i]['type_2'])) {
-                    $pdf->SetFont('helvetica', 'B', 33);
+                    $pdf->SetFont('helvetica', 'B', 25);
                     $pdf->SetTextColor(0, 0, 0); // Black text for visibility
-                    $pdf->SetXY($data[$i]['type2_x'], $data[$i]['type2_y']);
+                    $textWidth = $pdf->GetStringWidth($data[$i]['type_2']);
+                    $x = ($pageWidth - $textWidth) / 2; // Center align horizontally
+                    $pdf->SetXY($x, $data[$i]['type2_y']);
+                    // $pdf->SetXY($data[$i]['type2_x'], $data[$i]['type2_y']);
                     $pdf->Write(0, $data[$i]['type_2']);
                 }
 
