@@ -2,7 +2,6 @@
 
 *If you’re tired of unreliable Roblox executors, KRNL is here to change your experience! KRNL is a high-performance, keyless Roblox executor developed by reverse-engineering experts to ensure a smooth, dependable gaming experience.*
 
-![Frame 2147223627](https://github.com/user-attachments/assets/3322cbc6-bcec-4816-824b-c835790d53d8)
 
 ## 📌 Why Choose KRNL?
 
@@ -79,4 +78,4 @@ Anime Soul Simulator
 
 Get started today with KRNL Executor and take your Roblox gaming to new heights. Stay up-to-date, stay undetected, and most importantly—enjoy the best in Roblox script execution!
 
-KRNL Executor: A dependable, keyless solution for Roblox fans!
+KRNL Executor: A dependable, keyless solution for Roblox fans.
