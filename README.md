@@ -1,6 +1,6 @@
 💻 KRNL Executor – Reliable Roblox Exploits with Keyless Operation
 
-*If you’re tired of unreliable Roblox executors, KRNL is here to change your experience! KRNL is a high-performance, keyless Roblox executor developed by reverse-engineering experts to ensure a smooth, dependable gaming experience.*
+*If you’re tired of unreliable Roblox executors, KRNL is here to change your experience! KRNL is a high-performance, keyless Roblox executor developed by reverse-engineering experts to ensure a smooth, dependable gaming experience.
 
 
 ## 📌 Why Choose KRNL?
