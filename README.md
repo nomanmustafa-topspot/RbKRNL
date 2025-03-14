@@ -10,6 +10,8 @@ KRNL Executor is a free Roblox executor that redefines Windows-based exploitatio
 
 ![Frame 2147223630 (2)](https://github.com/user-attachments/assets/971ea516-320a-439b-b9ce-1611a314e534)
 
+The program is in the Releases branch.
+
 ## 🔑 KRNL Key Features
 
 
